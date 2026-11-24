@@ -1,0 +1,446 @@
+{
+  "name": "manager",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "readStatus": "unread"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        224,
+        0
+      ],
+      "id": "0b9201c1-68d0-4324-aa9c-2e310f9b6dfa",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "nEOb0MmD21Riwb3C",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Mensaje:\n{{ $json.snippet }}\nAsunto:\n{{ $json.Subject }}\ndesde:\n{{ $json.From }}\npara:\n{{ $json.To }}",
+        "options": {
+          "systemMessage": "Sos un clasificador de consultas. Analizá el mensaje entrante y respondé ÚNICAMENTE con una de estas tres etiquetas exactas, sin agregar texto extra ni explicaciones:\n\n- WORKER_1: si se trata de consulta general o búsqueda/validación de datos.\n- WORKER_2: si se trata de presupuesto, servicio, redacción de respuesta o reclamo/urgente.\n- FALLBACK: si es ambiguo, falta información clave o no entra claramente en las anteriores.",
+          "maxIterations": 5
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        448,
+        0
+      ],
+      "id": "50dd3289-eb58-4afd-8303-16ac741e7ada",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        320,
+        208
+      ],
+      "id": "628b7dbc-4699-4564-9d9c-9bcb5e621e2e",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Busca filas de referencia o reglas en la hoja según la categoría o tema de la consulta para ayudar a clasificar o responder.",
+        "documentId": {
+          "__rl": true,
+          "value": "1rblX4Hg3xtszcrK0glZWawqMFYRDeEXcnU_FEcMYV5I",
+          "mode": "list",
+          "cachedResultName": "sheets",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rblX4Hg3xtszcrK0glZWawqMFYRDeEXcnU_FEcMYV5I/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rblX4Hg3xtszcrK0glZWawqMFYRDeEXcnU_FEcMYV5I/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "joaquin",
+              "lookupValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('values0_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        608,
+        208
+      ],
+      "id": "5cd2de4f-3ee3-4d93-b923-795b39b4966a",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "l4h9lHqjhCjDpiP7",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.trim() }}",
+                    "rightValue": "WORKER_1",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "504e3b68-3020-4356-8e33-7f1e0a1d8ac9"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "id": "bf916245-2d56-4fa2-a831-0f8e75654fdb",
+                    "leftValue": "={{ $json.output.trim() }}",
+                    "rightValue": "WORKER_2",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "id": "cffce83d-d714-4578-be15-7d8d781053df",
+                    "leftValue": "={{ $json.output.trim() }}",
+                    "rightValue": "FALLBACK",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.5,
+      "position": [
+        816,
+        0
+      ],
+      "id": "5534dd6a-c330-41c7-8483-728b3014b165",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e0b3c103-9970-43c8-a991-a1db78f7f2d4",
+              "name": "categoria",
+              "value": "={{ $('AI Agent').item.json.output.trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "d41e3501-c6b9-4808-b6d9-eefc69f5f3fb",
+              "name": "",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1040,
+        -64
+      ],
+      "id": "3ac417b2-4068-4984-a059-aa9604b0a529",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "4K2UjmzABwTUSmvj",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/4K2UjmzABwTUSmvj",
+          "cachedResultName": "sub workflow 1"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "categoria": "={{ $json.categoria }} "
+          },
+          "matchingColumns": [
+            "categoria"
+          ],
+          "schema": [
+            {
+              "id": "categoria",
+              "displayName": "categoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.4,
+      "position": [
+        1296,
+        -112
+      ],
+      "id": "5f470698-845f-426c-b9d8-e379d9882518",
+      "name": "Call 'My workflow'"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "654b1884-2e24-493e-8efc-904174e944a4",
+              "name": "status",
+              "value": "fallback",
+              "type": "string"
+            },
+            {
+              "id": "b0197cc4-f0fd-4854-957f-3cd3158600cd",
+              "name": "motivo",
+              "value": "consulta fuera de categoria ",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1088,
+        48
+      ],
+      "id": "bd6a1884-f469-4ca9-b439-7e2c7ec465c7",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "P0JUVRpW6wcssC2S",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/P0JUVRpW6wcssC2S",
+          "cachedResultName": "sub workflow 2"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "categoria": "={{ $('AI Agent').item.json.output.trim() }}"
+          },
+          "matchingColumns": [
+            "categoria"
+          ],
+          "schema": [
+            {
+              "id": "categoria",
+              "displayName": "categoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.4,
+      "position": [
+        1312,
+        48
+      ],
+      "id": "43f28b77-cd22-4168-a449-de60c7957248",
+      "name": "Call 'My workflow 3'"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Call 'My workflow'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Call 'My workflow 3'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "f15c93d8-fe1f-4c94-961f-b1fc25f17f21",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "88b962fabb562b1796d88f3f2620d73aaa8c8a2f20f1fca502f844bfe069b9ed"
+  },
+  "nodeGroups": [],
+  "id": "7FxIuOx6HCnKPtFC",
+  "tags": []
+}

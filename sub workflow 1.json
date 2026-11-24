@@ -1,0 +1,122 @@
+{
+  "name": "sub workflow 1",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "categoria"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "fa3cb46a-bf0f-4f18-85ab-5b2eb1cbf545",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c54e818a-7713-456d-976b-71cd61362a13",
+              "name": "status ",
+              "value": "succes",
+              "type": "string"
+            },
+            {
+              "id": "5b7bf64e-264b-47f4-a1b1-909e7c5e08d6",
+              "name": "categoria",
+              "value": "procesado",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "d8f7e525-57c3-4369-9933-c1f2f211d524",
+      "name": "Edit Fields",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6df18c8c-c7c4-4e8e-8a5f-8caf364e036a",
+              "name": "status",
+              "value": "error",
+              "type": "string"
+            },
+            {
+              "id": "c27cf560-3c53-48dc-8a75-2c2b27ab69aa",
+              "name": "categoria",
+              "value": "fallo en worker 1 ",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        448,
+        96
+      ],
+      "id": "67c1cbb2-f20b-45ba-884c-da055acf00fd",
+      "name": "Edit Fields1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "cafed2ca-c413-4ba6-b5ae-6b2aad6cad70",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "88b962fabb562b1796d88f3f2620d73aaa8c8a2f20f1fca502f844bfe069b9ed"
+  },
+  "nodeGroups": [],
+  "id": "4K2UjmzABwTUSmvj",
+  "tags": []
+}
