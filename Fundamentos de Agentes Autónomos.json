@@ -1,0 +1,164 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "readStatus": "unread"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        224,
+        0
+      ],
+      "id": "f7e2ad58-b2af-4491-a728-4b2c2858d1c9",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "nEOb0MmD21Riwb3C",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Mensaje:\n{{ $json.snippet }}\nAsunto:\n{{ $json.Subject }}\ndesde:\n{{ $json.From }}\npara:\n{{ $json.To }}",
+        "options": {
+          "systemMessage": "sos un asistente de clasificación y triaje de consultas entrantes.\nAnalizá el mensaje recibido y clasificá la intención en una de estas categorías:\n\nconsulta_general: dudas simples sobre horarios, información básica o estado general.\n\npresupuesto_o_servicio: pedidos de cotización, alcance o contratación.\n\nreclamo_o_urgente: quejas, problemas graves, pagos/reembolsos o casos sensibles.\n\nReglas:\n\nSi necesitás consultar información base o reglas antes de responder, usá la herramienta disponible; no inventes datos.\n\nSi el caso es reclamo_o_urgente o falta información clave, marcá claramente que requiere derivación a humano en lugar de dar una respuesta definitiva.\n\nRespondé de forma clara, breve y estructurada indicando: Categoría, Acción/Respuesta y Requiere humano (Sí/No).",
+          "maxIterations": 5
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        448,
+        0
+      ],
+      "id": "2e8221de-c2f4-42bf-b068-a22efe29bd36",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        320,
+        208
+      ],
+      "id": "972237d4-7910-41d9-b1ef-f72e9bd561f0",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Busca filas de referencia o reglas en la hoja según la categoría o tema de la consulta para ayudar a clasificar o responder.",
+        "documentId": {
+          "__rl": true,
+          "value": "1rblX4Hg3xtszcrK0glZWawqMFYRDeEXcnU_FEcMYV5I",
+          "mode": "list",
+          "cachedResultName": "sheets",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rblX4Hg3xtszcrK0glZWawqMFYRDeEXcnU_FEcMYV5I/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rblX4Hg3xtszcrK0glZWawqMFYRDeEXcnU_FEcMYV5I/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "joaquin",
+              "lookupValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('values0_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        608,
+        208
+      ],
+      "id": "351a4773-de0b-4177-bbcf-b732b08104ad",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "l4h9lHqjhCjDpiP7",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "bf8430e6-d91e-4c85-a249-add9a4c0e2f6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "88b962fabb562b1796d88f3f2620d73aaa8c8a2f20f1fca502f844bfe069b9ed"
+  },
+  "nodeGroups": [],
+  "id": "ZCBhO1lkcTBYrK3C",
+  "tags": []
+}
